@@ -1,4 +1,5 @@
 //Counter on PORT 1
+//Code for Hex counter
 #include<reg51.h>
 #define Del 30000
 
