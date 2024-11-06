@@ -1,0 +1,106 @@
+//ADC LCD PIC
+
+#include <stdio.h>
+#include <p18f4550.h>
+
+#define RS LATCbits.LATC0
+#define E LATCbits.LATC1
+#define LCDPORT LATB
+
+void delay()
+{
+    unsigned int i;
+    for(i = 0; i < 30000; i++);
+}
+
+void sendCommand(unsigned char command)
+{
+    LCDPORT = command;
+    RS = 0;
+    E = 1;
+    delay();
+    E = 0;
+    delay();
+}
+
+void sendData(unsigned char data)
+{
+    LCDPORT = data;
+    RS = 1;
+    E = 1;
+    delay();
+    E = 0;
+    delay();
+}
+
+void InitLCD(void)
+{
+    sendCommand(0x38);   // LCD 8-bit mode, 2 line, 5x7
+    sendCommand(0x01);   // Clear display
+    sendCommand(0x0F);   // Display ON, cursor blinking
+    sendCommand(0x06);   // Entry mode set, increment cursor
+}
+
+void ADCInit()
+{
+    TRISEbits.RE2 = 1;       // Set RE2/AN7 as input for analog channel
+    ADCON0 = 0b00011101;     // Select AN7, turn ADC ON
+    ADCON1 = 0b00000111;     // Configure analog pins, all digital except AN7
+    ADCON2 = 0b10101110;     // Right justify, 12 TAD, Fosc/64
+}
+
+unsigned short Read_ADC()
+{ 
+    GODONE = 1;                    // Start conversion
+    while(GODONE == 1);            // Wait until conversion completes
+    return ((ADRESH << 8) | ADRESL); // Combine ADRESH and ADRESL to get the full 10-bit result
+}
+
+void DisplayResult(unsigned short ADCVal)
+{
+    unsigned char i, text[16];
+    unsigned short tempv;
+    tempv = ADCVal;
+    ADCVal = (5500 * tempv) / 1024;         // Convert ADC value to millivolts
+    sprintf(text, "%04dmv", ADCVal);        // Format as mV string
+
+    sendCommand(0x80);                      // Set cursor to line 1
+    for(i = 0; i < 6; i++)                  // Display mV result
+    {
+       sendData(text[i]);
+    }
+
+    sendCommand(0xC0);                      // Set cursor to line 2
+    for(i = 0; i < 10; i++)                 // Display binary representation
+    {
+        if(tempv & 0x200)
+        {
+            sendData('1');
+        }
+        else
+        {
+            sendData('0');
+        }
+        tempv = tempv << 1;
+    }
+}
+
+void main()
+{
+    unsigned short Ch_result;
+
+    TRISB = 0x00;            // Set PORTB as output for LCD data
+    TRISCbits.RC0 = 0;       // Set RC0 as output (RS)
+    TRISCbits.RC1 = 0;       // Set RC1 as output (E)
+
+    ADCInit();               // Initialize ADC
+    InitLCD();               // Initialize LCD
+
+    while(1)
+    {        
+        Ch_result = Read_ADC();       // Read ADC result
+        DisplayResult(Ch_result);     // Display result on LCD
+        delay();
+        delay();
+    }
+}

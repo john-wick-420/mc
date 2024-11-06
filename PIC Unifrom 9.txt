@@ -1,0 +1,42 @@
+//UART PIC
+
+#include <p18f4550.h>
+#include <stdio.h>
+
+void InitUART()
+{
+    TRISCbits.TRISC6 = 0;    // Set RC6 as output (TX)
+    TRISCbits.TRISC7 = 1;    // Set RC7 as input (RX)
+
+    SPBRG = 77;              // Baud rate = 9600 (assuming Fosc = 4MHz)
+
+    TXSTAbits.TXEN = 1;      // Enable transmitter
+    TXSTAbits.SYNC = 0;      // Asynchronous mode
+    TXSTAbits.TX9 = 0;       // 8-bit transmission
+    RCSTAbits.CREN = 1;      // Enable receiver (continuous receive)
+    RCSTAbits.SPEN = 1;      // Enable serial port (TX and RX)
+}
+
+void SendChar(unsigned char data)
+{
+    while(PIR1bits.TXIF == 0);  // Wait for TX buffer to be empty
+    TXREG = data;               // Transmit data
+}
+
+unsigned char GetChar(void)
+{
+    while(PIR1bits.RCIF == 0);  // Wait for RX buffer to be full
+    return RCREG;               // Return received data
+}
+
+void main(void)
+{
+    unsigned char key;
+    InitUART();  // Initialize UART
+
+    while(1)
+    {
+        key = GetChar();      // Get character from UART
+        SendChar(key);        // Echo the received character
+    }
+}

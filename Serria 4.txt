@@ -1,0 +1,88 @@
+// Anti Clock wise
+#include <REG51.h>
+
+void delay(unsigned char del); 
+
+void main()  
+{  
+    while(1)  
+    {  
+        P0 = 0x01;  
+        delay(1);  
+        
+        P0 = 0x02;  
+        delay(1);  
+        
+        P0 = 0x04;  
+        delay(1);  
+        
+        P0 = 0x08;  
+        delay(1);  
+    }  
+}   
+
+// Delay function
+void delay(unsigned char del)  
+{  
+    unsigned int i, j;  
+    for(i = 0; i < del; i++)  
+    {
+        for(j = 0; j < 500; j++); // Inner loop creates delay
+    }  
+}  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Clock Wise 
+
+#include <REG51.h>
+
+// Delay function declaration
+void delay(unsigned char del);
+
+void main() 
+{ 
+    while(1) 
+    { 
+        P0 = 0x08; 
+        delay(1); 
+
+        P0 = 0x04; 
+        delay(1); 
+
+        P0 = 0x02; 
+        delay(1); 
+
+        P0 = 0x01; 
+        delay(1); 
+    } 
+} 
+
+// Delay function definition
+void delay(unsigned char del) 
+{ 
+    unsigned int i, j; 
+    for(i = 0; i < del; i++) 
+    { 
+        for(j = 0; j < 500; j++);  // Inner loop creates a delay
+    } 
+} 
+

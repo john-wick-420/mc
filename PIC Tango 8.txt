@@ -1,0 +1,45 @@
+//Timer Interrupt
+#include <p18f4550.h>
+
+void timerInit(void)
+{
+    T0CON = 0b00000111;      // Configure Timer0: 8-bit, prescaler = 256
+    TMR0H = 0xED;            // Load the high byte of the timer
+    TMR0L = 0xB0;            // Load the low byte of the timer
+}
+
+void Interrupt_Init(void)
+{
+    IPEN = 1;                // Enable the interrupt priority levels
+    INTCON = 0b11100000;     // Global interrupt enable, peripheral interrupt enable, TMR0 interrupt enable
+    TMR0IP = 0;              // Low priority for TMR0 interrupt
+}
+
+void interrupt low_priority timerinterrupt(void)
+{
+    if (TMR0IF == 1)          // Check if the TMR0 interrupt flag is set
+    {
+        TMR0ON = 0;           // Turn off Timer0
+        TMR0IF = 0;           // Clear the interrupt flag
+        LATB = ~LATB;         // Toggle LATB output
+        TMR0H = 0xED;         // Reload the high byte of the timer
+        TMR0L = 0xB0;         // Reload the low byte of the timer
+        TMR0ON = 1;           // Turn on Timer0
+    }
+}
+
+void main(void)
+{
+    TRISB = 0x00;            // Set PORTB as output
+    LATB = 0xFF;             // Set all pins of PORTB to high
+
+    Interrupt_Init();        // Initialize interrupts
+    timerInit();             // Initialize Timer0
+    TMR0ON = 1;              // Turn on Timer0
+
+    while(1);                // Infinite loop, interrupts will handle the functionality
+}
+
+
+
+

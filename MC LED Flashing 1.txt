@@ -1,0 +1,25 @@
+//LED Flashing on PORT 2
+#include<reg51.h>
+#define Del 3000
+sfr LED_PORT2=0xA0;         				// defining LED_PORT2 for PORT2
+
+void delay(unsigned int x)			// delay function
+{
+	unsigned int i,j;
+	for(i=0;i<x;i++)
+		
+			for(j=0;j<=100;j++);
+		
+			
+}
+
+void main(void)
+{
+	while(1)										// do it continuosly
+		{
+			LED_PORT2=0xff;									// LED ON
+			delay(Del);
+			LED_PORT2=0x00;									// LED OFF
+			delay(Del);
+		}
+}
